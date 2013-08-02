@@ -1,0 +1,72 @@
+<div id="the-content" class="clearfix">
+    <div id="home">
+        <div class="homeTitleBar">
+            {% set locationMessage = '<strong>' ~ location.regionName ~ '</strong>' %}
+            {% set homeTitle = trans('listingpageitemslisting.FindAdsIn', { '<<NUMBER>>': '', '<<LOCATION>>': locationMessage }) %}
+            <h1>{{ homeTitle }}</h1>
+            {% if location.country.config.stateCityCase != 8 %}
+                <a id="locationRedirectModalLink" href="javascript:void(0)" rel="nofollow">
+                    {% if location.state is empty and location.city is empty %}
+                        {% if location.country.config.stateCityCase == 5 %}
+                            {{ trans('countrystatecity.ChooseCityOrProvince')|capitalize }}
+                        {% else %}
+                            {{ trans('countrystatecity.ChooseCityOrState')|capitalize }}
+                        {% endif %}
+                    {% else %}
+                        {{ trans('changelocationheader.Change')|capitalize }}
+                    {% endif %}
+                </a>
+                {% set countryName = location.country.name %}
+                {% if location.country.config.stateCityCase == 5 %}
+                    {% set provinceCase = trans('messages_item_page.Province')|lower %}
+                    {% set title = trans('countrystatecity.SetYourCityOrStateInCountry', { '<<COUNTRY>>': countryName, '<<STATE_CASE>>': provinceCase }) %}
+                {% else %}
+                    {% set title = trans('selectregion.SelectCityStateInCountry', { '<<COUNTRY>>': countryName }) %}
+                {% endif %}
+                <div id="locationRedirectModal" title="{{ title }}" style="display: none;">
+                </div>
+                {% set useMap = location.country.id in [193, 30, 2] %}
+                {% if not language.isDefault %}
+                    {% set addToUrl = '%s/'|format(language.code) %}
+                {% else %}
+                    {% set addToUrl = '' %}
+                {% endif %}
+                {% set entireCountryUrl = url.country ~ '/' %}
+                {% if location.state is not empty and location.city is empty %}
+                    {% set currentStateUrl = 'http://' ~ location.state.host ~ '/' %}
+                {% else %}
+                    {% set currentStateUrl = '' %}
+                {% endif %}
+                {% set metaCode = language.code %}
+                {% jsenqueuer %}
+                <script type="text/javascript">
+                    jQuery('#locationRedirectModalLink').click(function(event) {
+                        event.preventDefault();
+                        locationModalEvent('{{ useMap }}', 'index', {{ addToUrl|json_encode|raw }}, {{ entireCountryUrl|json_encode|raw }}, {{ currentStateUrl|json_encode|raw }}, {{ metaCode|json_encode|raw }}, 1);
+                    });
+                </script>
+                {% endjsenqueuer %}
+            {% endif %}
+        </div>
+        {% if ads.displayFeaturedAds == true %}
+            {{ renderModule('HomeFeaturedAds') }}
+        {% endif %}
+        {% include "home/categoryTree.html" %}
+    </div>
+    {% include "home/marketing.html" %}
+    {% if location.country.id not in [30, 99, 162, 193] %}
+        {{ ads.testCode|raw }}
+        {{ ads.floatingRightAd|raw }}
+    {% endif %}
+    {% if location.country.config.stateCityCase != 8 or model.keywords is not empty or model.popularSearches.show %}
+    <div id="populars-on-olx" class="clearfix">
+        <h1 class="box-title">
+            {{ trans('popularsearchesbody.PopularOn', { '<<OLX_DOMAIN>>': location.country.host|replace({ ('www.'): '' }) }) }}
+        </h1>
+        {% if location.country.config.stateCityCase != 8 %}
+            {% include "home/locations.html" %}
+        {% endif %}
+        {% include "home/popularSearches.html" %}
+    </div>
+    {% endif %}
+</div>

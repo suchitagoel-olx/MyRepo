@@ -1,0 +1,48 @@
+{% include "head/home/index.html" %}
+
+{% if location.country.id in [] %}
+    {% include "home/surveyBanner.html" %}
+{% endif %}
+
+<h1 id="header_keywords">
+{% if metaTag.headerKeywords is not empty %}
+    <strong>{{ metaTag.headerKeywords|striptags }}</strong>
+{% endif %}
+</h1>
+
+<div id="supercontainer">
+ajit
+    {% include "header/index.html" %}
+
+    {{ renderModule('LocationFilter') }}
+
+    {% set selectedCountryId = location.country.id %}
+    {% set siteLanguageId = language.id %}
+    {% jsenqueuer %}
+    <script type="text/javascript">
+        loadHomeUtils({{ selectedCountryId }}, {{ siteLanguageId }}, {{ constant('VERSION_FILES') }});
+    </script>
+    {% endjsenqueuer %}
+
+    {% if location.country.id == 99 %}
+        {% include "home/backToUsa.html" %}
+    {% endif %}
+
+    {% include "home/body.html" %}
+
+    {% if location.country.id == 99 %}
+        {% jsenqueuer %}
+        <script type="text/javascript">
+            deleteCookie("language_id", "/", ".olx.in");
+        </script>
+        {% endjsenqueuer %}
+    {% endif %}
+
+    {% if url.host == 'www.olx.com' %}
+        {% include "home/redirectModal.html" %}
+    {% else %}
+        {% include "home/suggestLocation.html" %}
+    {% endif %}
+
+    {% include "footer/home/index.html" %}
+</div>
